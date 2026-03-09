@@ -84,8 +84,8 @@ export function ProfileCard({ profile }: { profile: ProfileProps }) {
               <a
                 href={`https://api.whatsapp.com/send/?phone=${
                   profile.whatsapp.replace(/[^0-9]/g, '').startsWith('01') && profile.whatsapp.replace(/[^0-9]/g, '').length === 11 
-                    ? '+88' + profile.whatsapp.replace(/[^0-9]/g, '') 
-                    : '+' + profile.whatsapp.replace(/[^0-9]/g, '')
+                    ? '88' + profile.whatsapp.replace(/[^0-9]/g, '') 
+                    : profile.whatsapp.replace(/[^0-9]/g, '')
                 }`}
                 target="_blank"
                 rel="noopener noreferrer"
