@@ -5,11 +5,13 @@ import { ArrowLeft, Upload, CheckCircle2, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
+import { allDistricts } from '@/lib/bangladesh';
 
 export default function AddProfilePage() {
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
+  const [expectedOtp, setExpectedOtp] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -46,9 +48,10 @@ export default function AddProfilePage() {
       }
 
       setStep(2);
+      setExpectedOtp(data.otp || data.simulatedOtp);
       // For demo purposes, if API key is missing, it returns simulatedOtp
-      if (data.simulatedOtp) {
-        console.log('Simulated OTP:', data.simulatedOtp);
+      if (data.simulatedOtp || data.otp) {
+        console.log('OTP sent successfully');
       }
     } catch (err: any) {
       setError(err.message);
@@ -64,10 +67,10 @@ export default function AddProfilePage() {
 
     // Simulate OTP verification
     setTimeout(() => {
-      if (otp.length === 4) {
+      if (otp === expectedOtp) {
         setStep(3);
       } else {
-        setError('Invalid OTP. Please enter 4 digits.');
+        setError('Invalid OTP. Please check the code and try again.');
       }
       setIsLoading(false);
     }, 1000);
@@ -381,17 +384,7 @@ export default function AddProfilePage() {
                       className="w-full rounded-xl border border-white/10 bg-black/50 px-4 py-2.5 text-white placeholder-zinc-600 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/20 appearance-none"
                     >
                       <option value="" disabled>Select District</option>
-                      {[
-                        'Bagerhat', 'Bandarban', 'Barguna', 'Barisal', 'Bhola', 'Bogra', 'Brahmanbaria', 'Chandpur',
-                        'Chapainawabganj', 'Chattogram', 'Chuadanga', 'Comilla', 'Cox\'s Bazar', 'Dhaka', 'Dinajpur',
-                        'Faridpur', 'Feni', 'Gaibandha', 'Gazipur', 'Gopalganj', 'Habiganj', 'Jamalpur', 'Jashore',
-                        'Jhalokati', 'Jhenaidah', 'Joypurhat', 'Khagrachhari', 'Khulna', 'Kishoreganj', 'Kurigram',
-                        'Kushtia', 'Lakshmipur', 'Lalmonirhat', 'Madaripur', 'Magura', 'Manikganj', 'Meherpur',
-                        'Moulvibazar', 'Munshiganj', 'Mymensingh', 'Naogaon', 'Narail', 'Narayanganj', 'Narsingdi',
-                        'Natore', 'Netrokona', 'Nilphamari', 'Noakhali', 'Pabna', 'Panchagarh', 'Patuakhali',
-                        'Pirojpur', 'Rajbari', 'Rajshahi', 'Rangamati', 'Rangpur', 'Satkhira', 'Shariatpur',
-                        'Sherpur', 'Sirajganj', 'Sunamganj', 'Sylhet', 'Tangail', 'Thakurgaon'
-                      ].map(d => (
+                      {allDistricts.map(d => (
                         <option key={d} value={d}>{d}</option>
                       ))}
                     </select>

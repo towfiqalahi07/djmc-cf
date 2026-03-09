@@ -59,7 +59,7 @@ export async function POST(req: Request) {
 
     // Check if it's a success response from BulkSMSBD
     if (data.includes('202') || data.includes('Success')) {
-      return NextResponse.json({ success: true, formattedPhone });
+      return NextResponse.json({ success: true, formattedPhone, otp });
     } else {
       console.error('BulkSMS API Error:', data);
       return NextResponse.json({ error: 'Failed to send OTP via SMS provider' }, { status: 500 });

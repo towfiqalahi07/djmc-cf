@@ -1,10 +1,11 @@
 'use client';
 
 import { ProfileCard } from '@/components/ProfileCard';
-import { Search, Map, BarChart3, UserPlus, Loader2 } from 'lucide-react';
+import { Search, Map, BarChart3, UserPlus, Loader2, ChevronDown } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import { getDivision, divisionToDistricts } from '@/lib/bangladesh';
 
 interface ProfileProps {
   id: string;
@@ -23,7 +24,7 @@ export default function HomePage() {
   const [profiles, setProfiles] = useState<ProfileProps[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
+  const [selectedDivision, setSelectedDivision] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchProfiles() {
@@ -67,12 +68,12 @@ export default function HomePage() {
       profile.admissionRoll.includes(searchQuery) ||
       profile.district.toLowerCase().includes(searchQuery.toLowerCase());
       
-    const matchesDistrict = selectedDistrict ? profile.district === selectedDistrict : true;
+    const matchesDivision = selectedDivision ? getDivision(profile.district) === selectedDivision : true;
     
-    return matchesSearch && matchesDistrict;
+    return matchesSearch && matchesDivision;
   });
 
-  const uniqueDistricts = Array.from(new Set(profiles.map(p => p.district))).sort();
+  const uniqueDivisions = Object.keys(divisionToDistricts).sort();
 
   return (
     <div className="min-h-screen bg-black text-zinc-300 selection:bg-zinc-800 selection:text-white">
@@ -90,7 +91,6 @@ export default function HomePage() {
           
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-zinc-400">
             <Link href="/" className="text-white">Directory</Link>
-            <Link href="/map" className="hover:text-white transition-colors">Map View</Link>
             <Link href="/stats" className="hover:text-white transition-colors">Statistics</Link>
           </nav>
 
@@ -130,30 +130,20 @@ export default function HomePage() {
             />
           </div>
           
-          <div className="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0">
-            <button 
-              onClick={() => setSelectedDistrict(null)}
-              className={`whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
-                selectedDistrict === null 
-                  ? 'border-white/10 bg-zinc-900/50 text-zinc-300 hover:bg-zinc-800 hover:text-white' 
-                  : 'border-white/10 bg-transparent text-zinc-400 hover:bg-zinc-900 hover:text-white'
-              }`}
+          <div className="relative min-w-[160px]">
+            <select
+              value={selectedDivision || ''}
+              onChange={(e) => setSelectedDivision(e.target.value === '' ? null : e.target.value)}
+              className="w-full appearance-none rounded-2xl border border-white/10 bg-zinc-900/50 py-3 pl-4 pr-10 text-sm font-medium text-white focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/20 cursor-pointer"
             >
-              All Students
-            </button>
-            {uniqueDistricts.map(district => (
-              <button 
-                key={district}
-                onClick={() => setSelectedDistrict(district)}
-                className={`whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
-                  selectedDistrict === district 
-                    ? 'border-white/10 bg-zinc-900/50 text-zinc-300 hover:bg-zinc-800 hover:text-white' 
-                    : 'border-white/10 bg-transparent text-zinc-400 hover:bg-zinc-900 hover:text-white'
-                }`}
-              >
-                {district}
-              </button>
-            ))}
+              <option value="">All Divisions</option>
+              {uniqueDivisions.map(division => (
+                <option key={division} value={division}>
+                  {division}
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400 pointer-events-none" />
           </div>
         </div>
 
