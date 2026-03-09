@@ -35,6 +35,17 @@ export default function AddProfilePage() {
     setError('');
 
     try {
+      // First check if the phone number already exists in the database
+      const { data: existingStudent, error: checkError } = await supabase
+        .from('students')
+        .select('id')
+        .eq('phone', phone)
+        .single();
+
+      if (existingStudent) {
+        throw new Error('A profile with this phone number already exists.');
+      }
+
       const res = await fetch('/api/send-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

@@ -113,7 +113,7 @@ export default function HomePage() {
             Batch Directory
           </h1>
           <p className="mt-4 text-lg text-zinc-400 max-w-2xl">
-            The official database for DjMC Batch 35. Find your batchmates, explore districts, and stay connected.
+            The unofficial database for DjMC Batch 35. Find your batchmates, explore districts, and stay connected.
           </p>
         </div>
 

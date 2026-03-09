@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft, Loader2, Users, MapPin, GraduationCap, Droplets } from 'lucide-react';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { supabase } from '@/lib/supabase';
 import { getDivision } from '@/lib/bangladesh';
 import {
@@ -16,8 +17,9 @@ import {
   PieChart,
   Pie,
   Cell,
-  Treemap,
 } from 'recharts';
+
+const InteractiveMap = dynamic(() => import('@/components/InteractiveMap'), { ssr: false });
 
 interface ProfileProps {
   id: string;
@@ -84,55 +86,13 @@ export default function StatsPage() {
     .sort((a, b) => b.value - a.value)
     .slice(0, 10);
 
-  // Division & District Hierarchical Data for Treemap
+  // Division & District Hierarchical Data
   const divisionMap: Record<string, Record<string, number>> = {};
   profiles.forEach(p => {
     const div = getDivision(p.district);
     if (!divisionMap[div]) divisionMap[div] = {};
     divisionMap[div][p.district] = (divisionMap[div][p.district] || 0) + 1;
   });
-
-  const treemapData = Object.entries(divisionMap).map(([divisionName, districts]) => {
-    return {
-      name: divisionName,
-      children: Object.entries(districts).map(([districtName, count]) => ({
-        name: districtName,
-        size: count,
-      })),
-    };
-  });
-
-  // Custom Treemap Content
-  const CustomizedContent = (props: any) => {
-    const { root, depth, x, y, width, height, index, payload, colors, rank, name } = props;
-    
-    return (
-      <g>
-        <rect
-          x={x}
-          y={y}
-          width={width}
-          height={height}
-          style={{
-            fill: depth < 2 ? COLORS[Math.floor((index || 0) % COLORS.length)] : '#ffffff10',
-            stroke: '#18181b',
-            strokeWidth: 2 / (depth + 1e-10),
-            strokeOpacity: 1 / (depth + 1e-10),
-          }}
-        />
-        {depth === 1 && width > 50 && height > 30 ? (
-          <text x={x + width / 2} y={y + height / 2} textAnchor="middle" fill="#fff" fontSize={14} fontWeight="bold">
-            {name}
-          </text>
-        ) : null}
-        {depth === 2 && width > 40 && height > 20 ? (
-          <text x={x + width / 2} y={y + height / 2} textAnchor="middle" fill="#ffffff90" fontSize={10}>
-            {name}
-          </text>
-        ) : null}
-      </g>
-    );
-  };
 
   return (
     <div className="min-h-screen bg-black text-zinc-300 selection:bg-zinc-800 selection:text-white flex flex-col">
@@ -211,29 +171,12 @@ export default function StatsPage() {
 
             {/* Charts */}
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-              {/* Geographic Distribution Treemap */}
+              {/* Geographic Distribution Map */}
               <div className="rounded-2xl border border-white/5 bg-zinc-900/50 p-6 lg:col-span-2">
                 <h3 className="mb-2 text-lg font-semibold text-white">Geographic Distribution Map</h3>
-                <p className="mb-6 text-sm text-zinc-400">Division and District wise student density</p>
-                <div className="h-[400px] w-full mb-8">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <Treemap
-                      data={treemapData}
-                      dataKey="size"
-                      aspectRatio={4 / 3}
-                      stroke="#fff"
-                      fill="#8884d8"
-                      content={<CustomizedContent />}
-                    >
-                      <Tooltip
-                        contentStyle={{ backgroundColor: '#18181b', border: '1px solid #3f3f46', borderRadius: '8px' }}
-                        formatter={(value: any, name: any, props: any) => [
-                          `${value} Students`,
-                          props.payload.name
-                        ]}
-                      />
-                    </Treemap>
-                  </ResponsiveContainer>
+                <p className="mb-6 text-sm text-zinc-400">Interactive map showing student density across districts</p>
+                <div className="h-[500px] w-full mb-8">
+                  <InteractiveMap districtCounts={districtCounts} />
                 </div>
 
                 {/* Detailed Breakdown */}
