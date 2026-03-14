@@ -1,0 +1,6 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "your-project-name", // Change this to your project name
+  "compatibility_date": "2024-11-01",
+  "compatibility_flags": ["nodejs_compat"]
+}
